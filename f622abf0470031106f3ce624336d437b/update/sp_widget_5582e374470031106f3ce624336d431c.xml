@@ -1,9 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
     <sp_widget action="INSERT_OR_UPDATE">
         <category>custom</category>
-        <client_script><![CDATA[api.controller=function() {
-  /* widget controller */
-  var c = this;
+        <client_script><![CDATA[api.controller = function($document) {
+    /* widget controller */
+    var c = this;
+    var reader = new FileReader();
+    c.currentIndex = null;
+    c.dataObj = null;
+    c.filesDataArr = [];
+    reader.onload = function() {
+		// debugger;
+        if (reader.readyState == 2 && c.dataObj) {
+            c.dataObj.binary = reader.result;
+			console.log('length: ' + reader.result.length);
+            c.filesDataArr.push(c.dataObj);
+        }
+        if (c.files && c.files.length && c.currentIndex < c.files.length) {
+            processFile(c.currentIndex);
+        } else {
+            console.log(c.filesDataArr);
+        }
+    };
+
+    c.files = null;
+
+
+    c.fileLoaded = function() {
+		c.filesDataArr = [];
+        if (c.files.length) {
+			processFile(0);
+        }
+};
+
+function processFile(index) {
+    c.currentIndex = index + 1;
+    var file = c.files.item(index);
+    if (file) {
+        reader.readAsBinaryString(file);
+        c.dataObj = {
+            name: file.name,
+            content: file.type,
+            binary: null
+        };
+    }
+}
 };]]></client_script>
         <controller_as>c</controller_as>
         <css/>
@@ -32,18 +72,19 @@
         <sys_created_by>admin</sys_created_by>
         <sys_created_on>2023-07-13 08:47:53</sys_created_on>
         <sys_id>5582e374470031106f3ce624336d431c</sys_id>
-        <sys_mod_count>0</sys_mod_count>
+        <sys_mod_count>65</sys_mod_count>
         <sys_name>Attachment widget</sys_name>
         <sys_package display_value="Attachment widget" source="x_408998_attch_wid">f622abf0470031106f3ce624336d437b</sys_package>
         <sys_policy/>
         <sys_scope display_value="Attachment widget">f622abf0470031106f3ce624336d437b</sys_scope>
         <sys_update_name>sp_widget_5582e374470031106f3ce624336d431c</sys_update_name>
         <sys_updated_by>admin</sys_updated_by>
-        <sys_updated_on>2023-07-13 08:47:53</sys_updated_on>
+        <sys_updated_on>2023-07-13 15:09:38</sys_updated_on>
         <template><![CDATA[<div>
   <form>
     <label for="files">Upload files:</label>
-    <input type="file" id="files" name="files" multiple><br><br>
+    <input ng-model="c.files" files-input ng-change="c.fileLoaded()" type="file" id="files" name="files" multiple><br><br>
+    <button ng-click="c.add()">Add</button>
   </form>
 </div>]]></template>
     </sp_widget>
